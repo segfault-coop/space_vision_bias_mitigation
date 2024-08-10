@@ -36,7 +36,7 @@ if cleanup == "yes":
                 os.unlink(file_path)
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
-            
+
 
 # Create the download directory if it doesn't exist
 if not os.path.exists(download_dir):
@@ -44,7 +44,7 @@ if not os.path.exists(download_dir):
 
 def get_soup(url):
     response = requests.get(url)
-    response.raise_for_status()  
+    response.raise_for_status()
     # Ensure we notice bad responses
     return BeautifulSoup(response.text, 'html.parser')
 
