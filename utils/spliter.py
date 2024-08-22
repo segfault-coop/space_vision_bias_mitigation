@@ -3,6 +3,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import datasets
+import pandas as pd
+from io import BytesIO
 
 def process_PIL_to_CV2(img):
     img = np.array(img, dtype=np.uint8)
@@ -13,6 +15,7 @@ def load_images_from_folder(dataset_name="spacevision-upb/MOD_LSTD_E_downscaled"
     data_imgs = datasets.load_dataset(dataset_name)
     images = data_imgs['train']['image']
     images = [process_PIL_to_CV2(img) for img in images]
+    print(f'Total number of imgs {len(images)}')
     return images
 
 
@@ -45,16 +48,17 @@ for idx, db_image in enumerate(database_images):
     db_mask = create_mask(db_image, lower, upper)
     overlap_percentage = calculate_overlap(target_mask, db_image)
     if overlap_percentage >= threshold:
-        matched_images.append((db_image, overlap_percentage))
+        matched_images.append((idx, db_image, overlap_percentage))
 
-imgs_useable = []
+imgs_useable_idx = pd.DataFrame(columns=['hf_idx'])
 
 if matched_images:
     print("Images that meet the threshold:")
-    for img, overlap in matched_images:
+    for idx, img, overlap in matched_images:
         print(f'Overlap --- {overlap}')
-        imgs_useable.append(img)
+        imgs_useable_idx.loc[len(imgs_useable_idx)] = [idx]
 else:
     print("No images meet the threshold.")
     
-print(f'Usabel imgs {len(imgs_useable)}')
+print(f'Usabel imgs {len(imgs_useable_idx)}')
+imgs_useable_idx.to_csv("local_ds.csv")
