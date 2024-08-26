@@ -72,7 +72,7 @@ def main():
     from Hydra_MAE import SimpleMAE, HydraMAE
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = HydraMAE(train_mode=True)
+    model = HydraMAE(train_mode=True).to(device)
     print(model)
     if not list(model.parameters()):
         raise ValueError("The model has no parameters to optimize.")
@@ -82,9 +82,9 @@ def main():
     # ll = HydraMAE.hydra_loss(test_imgs,out,o_mask,pwr_weight)
     # print(ll)
     pwr_weight = [1,1,1]
-    total_epochs = 10
+    total_epochs = 20
     loss_fn = HydraMAE.hydra_loss
-    optim = torch.optim.AdamW(model.parameters(), lr=1e-3,betas=(0.9, 0.999), weight_decay=0.05)
+    optim = torch.optim.AdamW(model.parameters(), lr=1e-5)
     
     optim.zero_grad()
     avg_losses = []
@@ -97,8 +97,11 @@ def main():
             img_chunk = imgs[i:i+3]
             if len(img_chunk) < 3:
                 raise Exception("Smth went v wrong")
+            img_chunk_cuda = [img.to(device) for img in img_chunk]
             # img_chunk = [img.to(device) for img in img_chunk]
-            out, o_mask = model(img_chunk)
+            out, o_mask = model(img_chunk_cuda)
+            out = out.to("cpu")
+            o_mask = o_mask.to("cpu")
             ll = loss_fn(img_chunk, out, o_mask, pwr_weight)
             # print(f"Loss {ll}")
             losses.append(ll.item())
@@ -111,7 +114,7 @@ def main():
         avg_losses.append(avg_loss)
         print(f"Epoch {e+1}/{total_epochs}, Loss: {avg_loss}")
     
-    torch.save(model.state_dict(), 'model.pth')
+    torch.save(model.state_dict(), 'model_v2.pth')
     
     plt.figure(figsize=(10, 6))
     plt.plot(range(1, total_epochs + 1), avg_losses, marker='o', linestyle='-', color='b')

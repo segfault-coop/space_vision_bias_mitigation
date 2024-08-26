@@ -29,8 +29,9 @@ class SimpleMAE(nn.Module):
         
     def forward(self, img):
         ## ENCODER
+        device = img.device
         self.tokens = img.shape[0]
-        mask = torch.zeros(self.tokens).long()
+        mask = torch.zeros(self.tokens, device=device).long()
         if self.batch_idx == 1:
             mask_idx = torch.arange(0,7)
         elif self.batch_idx == 2:
@@ -48,7 +49,7 @@ class SimpleMAE(nn.Module):
         
         ## Decoder
         decoder_tokens = self.decoder_embed(encodings)
-        tokens = torch.zeros((self.num_patches, self.decoder_emb_size))
+        tokens = torch.zeros((self.num_patches, self.decoder_emb_size),device=device)
         tokens[~mask.bool()] = decoder_tokens[1:,:]
         tokens[mask.bool()] = torch.cat([self.mask_token] * (self.num_patches - (~mask.bool()).sum()))
         
@@ -93,7 +94,7 @@ class HydraMAE(nn.Module):
         inputs = torch.stack(inputs)
         mean = inputs.mean(dim=-1, keepdim=True)
         var = inputs.var(dim=-1,keepdim=True)
-        inputs = ((inputs - mean) / (var + 1.e-6) ** .5) ** 3
+        inputs = ((inputs - mean) / (var + 1.e-6) ** .5)
         token_lvl_loss = ((outputs - inputs) ** 2).mean(dim=-1)
         loss_01 = (token_lvl_loss * masks).sum() / masks.sum()
         return loss_01
