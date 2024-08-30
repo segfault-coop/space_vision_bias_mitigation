@@ -1,4 +1,10 @@
 # space_vision_bias_mitigation
+### Demo
+Download the [archive](https://drive.google.com/file/d/13vsYorlqskVraAk8rpUkCq5MvD20zqm4/view?usp=sharing) and extract it.
+```
+wget https://drive.google.com/file/d/13vsYorlqskVraAk8rpUkCq5MvD20zqm4/view?usp=sharing
+```
+From inside the extracted folder run the notebook ```inference.ipynb``` 
 ### Overview
 This repository contains code for processing space climate datasets, particularly using Masked Autoencoders (MAEs) and Stable Diffusion Models to perform data inference, training, and baseline comparisons. The goal is to enhance climate data analysis, downscale space climate images, and generate meaningful insights through advanced machine learning models.
 
